@@ -74,3 +74,21 @@ export const friendApi = {
   deleteFriend: (friendId: number) =>
     api.delete(`/api/friends/${friendId}`),
 };
+
+// Message API
+export const messageApi = {
+  // Get chat list
+  getChatList: () => api.get('/api/messages'),
+
+  // Get chat history with a user
+  getChatHistory: (userId: number, page?: number, size?: number) =>
+    api.get(`/api/messages/history/${userId}`, { params: { page, size } }),
+
+  // Send a message
+  sendMessage: (receiverId: number, content: string, messageType?: string) =>
+    api.post('/api/messages', { receiverId, content, messageType }),
+
+  // Mark messages as read
+  markAsRead: (fromUserId: number) =>
+    api.put(`/api/messages/read/${fromUserId}`),
+};

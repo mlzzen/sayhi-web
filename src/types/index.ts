@@ -54,3 +54,31 @@ export interface CreateFriendRequest {
 export interface UpdateFriendRequest {
   accept: boolean;
 }
+
+export type MessageType = 'TEXT' | 'IMAGE' | 'FILE';
+
+export interface Message {
+  id: number;
+  senderId: number;
+  receiverId: number;
+  senderUsername: string;
+  receiverUsername: string;
+  content: string;
+  messageType: MessageType;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface CreateMessageRequest {
+  receiverId: number;
+  content: string;
+  messageType?: MessageType;
+}
+
+export interface ChatHistoryItem {
+  friendId: number;
+  friendUsername: string;
+  friendAvatarUrl: string | null;
+  lastMessage: Message | null;
+  unreadCount: number;
+}
