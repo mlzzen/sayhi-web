@@ -1,5 +1,5 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { Message, ChatHistoryItem } from '../types';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { type Message, type ChatHistoryItem } from '../types';
 import { messageApi } from '../services/api';
 import { webSocketService } from '../services/websocket';
 import { useAuth } from './AuthContext';

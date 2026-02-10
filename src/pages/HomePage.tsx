@@ -1,22 +1,33 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FriendProvider } from '../context/FriendContext';
-import { ChatProvider } from '../context/ChatContext';
+import { ChatProvider, useChat } from '../context/ChatContext';
 import { FriendRequestNotification } from '../components/FriendRequestNotification';
 import { ContactsPage } from './ContactsPage';
 import { UserSearchPage } from './UserSearchPage';
 import { ChatListPage } from './ChatListPage';
 import { ChatWindow } from './ChatWindow';
-import { useChat } from '../context/ChatContext';
 import './HomePage.css';
 
 type Tab = 'contacts' | 'search' | 'chat';
 
-function ChatView() {
+function ChatView({ pendingChatUserId }: { pendingChatUserId: number | null }) {
   const { chatList, currentChatUserId, setCurrentChatUserId } = useChat();
 
+  // 如果有待处理的聊天请求，设置当前聊天用户
+  React.useEffect(() => {
+    if (pendingChatUserId) {
+      setCurrentChatUserId(pendingChatUserId);
+    }
+  }, [pendingChatUserId, setCurrentChatUserId]);
+
   const getChatInfo = (friendId: number) => {
+    console.log('chatList', chatList);
+    
+    console.log('friendId', friendId);
+    
     const chat = chatList.find((c) => c.friendId === friendId);
+    console.log('chat', chat);
     return chat || { friendUsername: '未知', friendAvatarUrl: null };
   };
 
@@ -38,6 +49,12 @@ function ChatView() {
 export function HomePage() {
   const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('chat');
+  const [pendingChatUserId, setPendingChatUserId] = useState<number | null>(null);
+
+  const handleChatClick = (friendId: number) => {
+    setPendingChatUserId(friendId);
+    setActiveTab('chat');
+  };
 
   return (
     <FriendProvider>
@@ -47,7 +64,7 @@ export function HomePage() {
             <h1>SayHi</h1>
             <div className="user-info">
               <span>Welcome, {user?.username}</span>
-              <button onClick={logout} className="logout-button">
+              <button className="logout-button" onClick={logout}>
                 Logout
               </button>
             </div>
@@ -77,9 +94,9 @@ export function HomePage() {
           </nav>
 
           <main className="home-content">
-            {activeTab === 'contacts' && <ContactsPage />}
+            {activeTab === 'contacts' && <ContactsPage onChatClick={handleChatClick} />}
             {activeTab === 'search' && <UserSearchPage />}
-            {activeTab === 'chat' && <ChatView />}
+            {activeTab === 'chat' && <ChatView pendingChatUserId={pendingChatUserId} />}
           </main>
         </div>
       </ChatProvider>

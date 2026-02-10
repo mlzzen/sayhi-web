@@ -127,8 +127,14 @@
 }
 
 .request-actions,
+.contact-actions,
 .action-btn {
   flex-shrink: 0;
+}
+
+.contact-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .action-btn {
@@ -151,6 +157,11 @@
 
 .action-btn.accept {
   background: #28a745;
+  color: white;
+}
+
+.action-btn.chat {
+  background: #007bff;
   color: white;
 }
 

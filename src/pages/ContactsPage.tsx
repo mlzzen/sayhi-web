@@ -1,11 +1,22 @@
 import { useState } from 'react';
 import { useFriends } from '../context/FriendContext';
+import { useChat } from '../context/ChatContext';
 import { type Friend, type FriendRequest } from '../types';
 import './ContactsPage.css';
 
-export function ContactsPage() {
+interface ContactsPageProps {
+  onChatClick?: (friendId: number) => void;
+}
+
+export function ContactsPage({ onChatClick }: ContactsPageProps = {}) {
   const { friends, pendingRequests, acceptFriendRequest, rejectFriendRequest, removeFriend } = useFriends();
+  const { setCurrentChatUserId } = useChat();
   const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends');
+
+  const handleChatClick = (friendId: number) => {
+    setCurrentChatUserId(friendId);
+    onChatClick?.(friendId);
+  };
 
   return (
     <div className="contacts-page">
@@ -43,6 +54,7 @@ export function ContactsPage() {
               <FriendItem
                 key={friend.id}
                 friend={friend}
+                onChat={() => handleChatClick(friend.id)}
                 onRemove={() => removeFriend(friend.id)}
               />
             ))
@@ -68,7 +80,13 @@ export function ContactsPage() {
   );
 }
 
-function FriendItem({ friend, onRemove }: { friend: Friend; onRemove: () => void }) {
+interface FriendItemProps {
+  friend: Friend;
+  onChat: () => void;
+  onRemove: () => void;
+}
+
+function FriendItem({ friend, onChat, onRemove }: FriendItemProps) {
   return (
     <div className="contact-item">
       <div className="avatar">
@@ -84,22 +102,29 @@ function FriendItem({ friend, onRemove }: { friend: Friend; onRemove: () => void
         <span className="username">{friend.username}</span>
         <span className="status">已添加好友</span>
       </div>
-      <button className="action-btn remove" onClick={onRemove}>
-        删除
-      </button>
+      <div className="contact-actions">
+        <button className="action-btn chat" onClick={onChat}>
+          发消息
+        </button>
+        <button className="action-btn remove" onClick={onRemove}>
+          删除
+        </button>
+      </div>
     </div>
   );
+}
+
+interface FriendRequestItemProps {
+  request: FriendRequest;
+  onAccept: () => void;
+  onReject: () => void;
 }
 
 function FriendRequestItem({
   request,
   onAccept,
   onReject,
-}: {
-  request: FriendRequest;
-  onAccept: () => void;
-  onReject: () => void;
-}) {
+}: FriendRequestItemProps) {
   return (
     <div className="contact-item request">
       <div className="avatar">
