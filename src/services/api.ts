@@ -1,9 +1,8 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
 const api: AxiosInstance = axios.create({
-  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -39,20 +38,20 @@ export default api;
 // Auth API
 export const authApi = {
   login: (email: string, password: string) =>
-    api.post('/auth/login', { email, password }),
+    api.post('/api/auth/login', { email, password }),
 
   register: (username: string, email: string, password: string) =>
-    api.post('/auth/register', { username, email, password }),
+    api.post('/api/auth/register', { username, email, password }),
 };
 
 // User API
 export const userApi = {
-  getCurrentUser: () => api.get('/users/me'),
+  getCurrentUser: () => api.get('/api/users/me'),
 
   updateProfile: (data: { username?: string; avatarUrl?: string }) =>
-    api.put('/users/me', data),
+    api.put('/api/users/me', data),
 
-  searchUsers: (query: string) => api.get(`/users/search?q=${encodeURIComponent(query)}`),
+  searchUsers: (query: string) => api.get(`/api/users/search?q=${encodeURIComponent(query)}`),
 
-  getUserById: (id: number) => api.get(`/users/${id}`),
+  getUserById: (id: number) => api.get(`/api/users/${id}`),
 };
