@@ -27,3 +27,30 @@ export interface ApiResponse<T> {
   message?: string;
   data?: T;
 }
+
+export type FriendshipStatus = 'PENDING' | 'ACCEPTED' | 'REJECTED';
+
+export interface FriendRequest {
+  id: number;
+  userId: number;
+  username: string;
+  avatarUrl: string | null;
+  status: FriendshipStatus;
+  createdAt: string;
+}
+
+export interface Friend {
+  id: number;
+  username: string;
+  avatarUrl: string | null;
+  status: FriendshipStatus;
+  createdAt: string;
+}
+
+export interface CreateFriendRequest {
+  userId: number;
+}
+
+export interface UpdateFriendRequest {
+  accept: boolean;
+}

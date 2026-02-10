@@ -102,3 +102,49 @@
   background-color: #fef3c7;
   color: #d97706;
 }
+
+.home-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  background: white;
+  border-bottom: 1px solid #eee;
+}
+
+.nav-item {
+  flex: 1;
+  max-width: 200px;
+  padding: 16px 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: #666;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.nav-item:hover {
+  color: #007bff;
+  background: #f8f9fa;
+}
+
+.nav-item.active {
+  color: #007bff;
+  border-bottom-color: #007bff;
+  font-weight: 500;
+}
+
+.coming-soon {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.coming-soon h2 {
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.coming-soon p {
+  color: #666;
+}

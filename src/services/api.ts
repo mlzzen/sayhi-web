@@ -55,3 +55,24 @@ export const userApi = {
 
   getUserById: (id: number) => api.get(`/api/users/${id}`),
 };
+
+// Friend API
+export const friendApi = {
+  // Get friends list
+  getFriends: () => api.get('/api/friends'),
+
+  // Get pending friend requests
+  getPendingRequests: () => api.get('/api/friends/requests'),
+
+  // Send friend request
+  sendFriendRequest: (userId: number) =>
+    api.post('/api/friends/request', { userId }),
+
+  // Accept or reject friend request
+  handleFriendRequest: (requestId: number, accept: boolean) =>
+    api.put(`/api/friends/request/${requestId}`, { accept }),
+
+  // Delete friend or cancel request
+  deleteFriend: (friendId: number) =>
+    api.delete(`/api/friends/${friendId}`),
+};
