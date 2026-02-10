@@ -1,6 +1,4 @@
-import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
-
-const API_BASE_URL = 'http://localhost:8080/api';
+import axios, { type AxiosInstance } from 'axios';
 
 const api: AxiosInstance = axios.create({
   headers: {
@@ -10,10 +8,10 @@ const api: AxiosInstance = axios.create({
 
 // Request interceptor to add auth token
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
+  (config) => {
     const token = localStorage.getItem('token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.set('Authorization', `Bearer ${token}`);
     }
     return config;
   },
