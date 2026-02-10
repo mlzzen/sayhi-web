@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { type User } from '../types';
 import { userApi } from '../services/api';
 import { useFriends } from '../context/FriendContext';
-import './UserSearchPage.css';
+import { Avatar } from '../components/ui/avatar';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 
 export function UserSearchPage() {
   const [query, setQuery] = useState('');
@@ -36,7 +38,6 @@ export function UserSearchPage() {
     try {
       await sendFriendRequest(userId);
       setMessage('好友请求已发送');
-      // Refresh the list to show updated status
       setResults((prev) =>
         prev.map((u) => (u.id === userId ? { ...u, email: '请求已发送' } : u))
       );
@@ -52,54 +53,51 @@ export function UserSearchPage() {
   };
 
   return (
-    <div className="search-page">
-      <div className="search-header">
-        <h2>添加好友</h2>
-        <p>搜索用户名或邮箱来添加好友</p>
+    <div className="p-5 max-w-lg mx-auto h-full overflow-auto">
+      <div className="mb-5">
+        <h2 className="text-xl font-semibold mb-1">添加好友</h2>
+        <p className="text-sm text-gray-500">搜索用户名或邮箱来添加好友</p>
       </div>
 
-      <div className="search-box">
-        <input
-          type="text"
+      <div className="flex gap-2.5 mb-5">
+        <Input
+          className="flex-1"
           placeholder="输入用户名或邮箱"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyPress={handleKeyPress}
         />
-        <button onClick={handleSearch} disabled={loading}>
+        <Button onClick={handleSearch} disabled={loading}>
           {loading ? '搜索中...' : '搜索'}
-        </button>
+        </Button>
       </div>
 
-      {message && <div className="search-message">{message}</div>}
+      {message && (
+        <div className="text-center py-2.5 mb-5 text-sm text-gray-600 bg-gray-50 rounded-lg">
+          {message}
+        </div>
+      )}
 
-      <div className="search-results">
+      <div className="flex flex-col gap-2.5">
         {results.map((user) => (
-          <div key={user.id} className="user-item">
-            <div className="avatar">
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt={user.username} />
-              ) : (
-                <div className="avatar-placeholder">
-                  {user.username.charAt(0).toUpperCase()}
-                </div>
-              )}
-            </div>
-            <div className="user-info">
-              <span className="username">{user.username}</span>
-              <span className="email">{user.email}</span>
+          <div key={user.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+            <Avatar
+              src={user.avatarUrl}
+              alt={user.username}
+              fallback={user.username.charAt(0).toUpperCase()}
+            />
+            <div className="flex-1 min-w-0">
+              <span className="font-medium block truncate">{user.username}</span>
+              <span className="text-xs text-gray-500 truncate block">{user.email}</span>
             </div>
             {isFriend(user.id) ? (
-              <button className="action-btn added" disabled>
+              <Button variant="success" size="sm" disabled>
                 已是好友
-              </button>
+              </Button>
             ) : (
-              <button
-                className="action-btn add"
-                onClick={() => handleAddFriend(user.id)}
-              >
+              <Button size="sm" onClick={() => handleAddFriend(user.id)}>
                 添加
-              </button>
+              </Button>
             )}
           </div>
         ))}

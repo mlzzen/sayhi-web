@@ -1,7 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { useChat } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
-import './ChatWindow.css';
+import { Avatar } from '../components/ui/avatar';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 
 interface ChatWindowProps {
   friendId: number;
@@ -20,13 +22,11 @@ export function ChatWindow({ friendId, friendUsername, friendAvatarUrl, onClose 
 
   const chatMessages = messages[friendId] || [];
 
-  // Load messages when opening chat
   useEffect(() => {
     loadMessages(friendId);
     markAsRead(friendId);
   }, [friendId]);
 
-  // Scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
@@ -59,39 +59,58 @@ export function ChatWindow({ friendId, friendUsername, friendAvatarUrl, onClose 
   };
 
   return (
-    <div className="chat-window">
-      <div className="chat-header">
-        <div className="chat-header-info">
-          <div className="avatar small">
-            {friendAvatarUrl ? (
-              <img src={friendAvatarUrl} alt={friendUsername} />
-            ) : (
-              <div className="avatar-placeholder">
-                {friendUsername.charAt(0).toUpperCase()}
-              </div>
-            )}
-          </div>
-          <span className="username">{friendUsername}</span>
-          {!isConnected && <span className="connection-status offline">离线</span>}
+    <div className="flex flex-col h-full bg-white w-full">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50">
+        <div className="flex items-center gap-2.5">
+          <Avatar
+            src={friendAvatarUrl}
+            alt={friendUsername}
+            fallback={friendUsername.charAt(0).toUpperCase()}
+            className="h-8 w-8"
+          />
+          <span className="font-medium">{friendUsername}</span>
+          {!isConnected && (
+            <span className="text-xs px-2 py-0.5 bg-gray-200 text-gray-500 rounded">
+              离线
+            </span>
+          )}
         </div>
-        <button className="close-btn" onClick={onClose}>
+        <button
+          className="text-gray-400 hover:text-gray-600 hover:bg-gray-200 p-1.5 rounded-md transition-colors"
+          onClick={onClose}
+        >
           ✕
         </button>
       </div>
 
-      <div className="messages-container">
+      <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
         {chatMessages.length === 0 ? (
-          <div className="empty-chat">
+          <div className="flex-1 flex items-center justify-center text-gray-400">
             <p>暂无消息，开始聊天吧！</p>
           </div>
         ) : (
           chatMessages.map((message) => {
             const isOwn = message.senderId === user?.id;
             return (
-              <div key={message.id} className={`message ${isOwn ? 'own' : 'other'}`}>
-                <div className="message-content">
-                  <div className="message-text">{message.content}</div>
-                  <div className="message-time">{formatTime(message.createdAt)}</div>
+              <div
+                key={message.id}
+                className={`flex max-w-[70%] ${isOwn ? 'self-end' : 'self-start'}`}
+              >
+                <div
+                  className={`px-4 py-2.5 rounded-2xl max-w-full ${
+                    isOwn
+                      ? 'bg-primary-500 text-white rounded-br-md'
+                      : 'bg-gray-100 text-gray-800 rounded-bl-md'
+                  }`}
+                >
+                  <div className="break-words leading-relaxed">{message.content}</div>
+                  <div
+                    className={`text-xs mt-1 opacity-70 text-right ${
+                      isOwn ? 'text-white' : 'text-gray-500'
+                    }`}
+                  >
+                    {formatTime(message.createdAt)}
+                  </div>
                 </div>
               </div>
             );
@@ -100,23 +119,22 @@ export function ChatWindow({ friendId, friendUsername, friendAvatarUrl, onClose 
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="chat-input">
-        <input
+      <div className="flex gap-2.5 px-4 py-3 border-t border-gray-100 bg-white">
+        <Input
           ref={inputRef}
-          type="text"
+          className="flex-1"
           placeholder="输入消息..."
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
           disabled={isSending}
         />
-        <button
-          className="send-btn"
+        <Button
           onClick={handleSend}
           disabled={!inputValue.trim() || isSending}
         >
           发送
-        </button>
+        </Button>
       </div>
     </div>
   );

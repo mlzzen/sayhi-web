@@ -1,9 +1,10 @@
 import { useChat } from '../context/ChatContext';
 import { useAuth } from '../context/AuthContext';
-import './ChatListPage.css';
+import { Avatar } from '../components/ui/avatar';
+import { Badge } from '../components/ui/badge';
 
 export function ChatListPage() {
-  const { chatList, messages, setCurrentChatUserId, refreshChatList } = useChat();
+  const { chatList, messages, setCurrentChatUserId } = useChat();
   const { user } = useAuth();
 
   const getUnreadCount = (friendId: number) => {
@@ -33,57 +34,60 @@ export function ChatListPage() {
   };
 
   return (
-    <div className="chat-list-page">
-      <div className="chat-list-header">
-        <h2>消息</h2>
+    <div className="h-full flex flex-col border-r border-gray-200 w-80 bg-white">
+      <div className="px-5 py-4 border-b border-gray-100">
+        <h2 className="text-lg font-semibold">消息</h2>
       </div>
 
-      <div className="chat-list">
+      <div className="flex-1 overflow-y-auto">
         {chatList.length === 0 ? (
-          <div className="empty-state">
+          <div className="text-center py-15 text-gray-400">
             <p>暂无聊天记录</p>
-            <p className="hint">开始和好友聊天吧！</p>
+            <p className="text-sm mt-1">开始和好友聊天吧！</p>
           </div>
         ) : (
           chatList.map((chat) => {
             const unreadCount = getUnreadCount(chat.friendId);
-            const isActive = chat.friendId === messages[chat.friendId]?.[0]?.receiverId;
 
             return (
               <div
                 key={chat.friendId}
-                className={`chat-item ${unreadCount > 0 ? 'has-unread' : ''}`}
+                className={`flex items-center gap-3 px-5 py-3 cursor-pointer transition-colors border-b border-gray-50 ${
+                  unreadCount > 0 ? 'bg-blue-50' : 'hover:bg-gray-50'
+                }`}
                 onClick={() => handleChatClick(chat.friendId)}
               >
-                <div className="avatar">
-                  {chat.friendAvatarUrl ? (
-                    <img src={chat.friendAvatarUrl} alt={chat.friendUsername} />
-                  ) : (
-                    <div className="avatar-placeholder">
-                      {chat.friendUsername.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <div className="chat-info">
-                  <div className="chat-info-header">
-                    <span className="username">{chat.friendUsername}</span>
-                    <span className="time">
+                <Avatar
+                  src={chat.friendAvatarUrl}
+                  alt={chat.friendUsername}
+                  fallback={chat.friendUsername.charAt(0).toUpperCase()}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium truncate">{chat.friendUsername}</span>
+                    <span className="text-xs text-gray-400">
                       {chat.lastMessage ? formatTime(chat.lastMessage.createdAt) : ''}
                     </span>
                   </div>
-                  <div className="last-message">
+                  <div className="mt-0.5">
                     {chat.lastMessage ? (
-                      <span className={unreadCount > 0 ? 'unread' : ''}>
+                      <span
+                        className={`text-sm truncate block ${
+                          unreadCount > 0 ? 'font-medium text-gray-800' : 'text-gray-500'
+                        }`}
+                      >
                         {chat.lastMessage.senderId === user?.id && '我: '}
                         {chat.lastMessage.content}
                       </span>
                     ) : (
-                      <span className="no-message">暂无消息</span>
+                      <span className="text-sm text-gray-300">暂无消息</span>
                     )}
                   </div>
                 </div>
                 {unreadCount > 0 && (
-                  <div className="unread-badge">{unreadCount}</div>
+                  <Badge variant="destructive" className="shrink-0">
+                    {unreadCount}
+                  </Badge>
                 )}
               </div>
             );

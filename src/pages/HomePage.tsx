@@ -7,14 +7,13 @@ import { ContactsPage } from './ContactsPage';
 import { UserSearchPage } from './UserSearchPage';
 import { ChatListPage } from './ChatListPage';
 import { ChatWindow } from './ChatWindow';
-import './HomePage.css';
+import { Button } from '../components/ui/button';
 
 type Tab = 'contacts' | 'search' | 'chat';
 
 function ChatView({ pendingChatUserId }: { pendingChatUserId: number | null }) {
   const { chatList, currentChatUserId, setCurrentChatUserId } = useChat();
 
-  // 如果有待处理的聊天请求，设置当前聊天用户
   React.useEffect(() => {
     if (pendingChatUserId) {
       setCurrentChatUserId(pendingChatUserId);
@@ -22,17 +21,12 @@ function ChatView({ pendingChatUserId }: { pendingChatUserId: number | null }) {
   }, [pendingChatUserId, setCurrentChatUserId]);
 
   const getChatInfo = (friendId: number) => {
-    console.log('chatList', chatList);
-    
-    console.log('friendId', friendId);
-    
     const chat = chatList.find((c) => c.friendId === friendId);
-    console.log('chat', chat);
-    return chat || { friendUsername: '未知', friendAvatarUrl: null };
+    return chat || { friendUsername: 'Unknown', friendAvatarUrl: null };
   };
 
   return (
-    <div className="chat-view">
+    <div className="flex h-full">
       <ChatListPage />
       {currentChatUserId && (
         <ChatWindow
@@ -59,41 +53,53 @@ export function HomePage() {
   return (
     <FriendProvider>
       <ChatProvider>
-        <div className="home-container">
-          <header className="home-header">
-            <h1>SayHi</h1>
-            <div className="user-info">
-              <span>Welcome, {user?.username}</span>
-              <button className="logout-button" onClick={logout}>
+        <div className="h-screen flex flex-col bg-gray-50">
+          <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
+            <h1 className="text-xl font-semibold text-gray-900">SayHi</h1>
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-gray-600">Welcome, {user?.username}</span>
+              <Button variant="outline" size="sm" onClick={logout}>
                 Logout
-              </button>
+              </Button>
             </div>
           </header>
 
           <FriendRequestNotification />
 
-          <nav className="home-nav">
+          <nav className="flex gap-2 px-6 py-3 bg-white border-b border-gray-200">
             <button
-              className={`nav-item ${activeTab === 'contacts' ? 'active' : ''}`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === 'contacts'
+                  ? 'bg-primary-500 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
               onClick={() => setActiveTab('contacts')}
             >
               通讯录
             </button>
             <button
-              className={`nav-item ${activeTab === 'search' ? 'active' : ''}`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === 'search'
+                  ? 'bg-primary-500 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
               onClick={() => setActiveTab('search')}
             >
               添加好友
             </button>
             <button
-              className={`nav-item ${activeTab === 'chat' ? 'active' : ''}`}
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                activeTab === 'chat'
+                  ? 'bg-primary-500 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
               onClick={() => setActiveTab('chat')}
             >
               消息
             </button>
           </nav>
 
-          <main className="home-content">
+          <main className="flex-1 overflow-hidden">
             {activeTab === 'contacts' && <ContactsPage onChatClick={handleChatClick} />}
             {activeTab === 'search' && <UserSearchPage />}
             {activeTab === 'chat' && <ChatView pendingChatUserId={pendingChatUserId} />}

@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useFriends } from '../context/FriendContext';
 import { useChat } from '../context/ChatContext';
 import { type Friend, type FriendRequest } from '../types';
-import './ContactsPage.css';
+import { Avatar } from '../components/ui/avatar';
+import { Badge } from '../components/ui/badge';
+import { Button } from '../components/ui/button';
 
 interface ContactsPageProps {
   onChatClick?: (friendId: number) => void;
@@ -19,34 +21,44 @@ export function ContactsPage({ onChatClick }: ContactsPageProps = {}) {
   };
 
   return (
-    <div className="contacts-page">
-      <div className="contacts-header">
-        <h2>通讯录</h2>
-        <span className="friend-count">{friends.length} 位好友</span>
+    <div className="p-5 max-w-lg mx-auto h-full overflow-auto">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-xl font-semibold">通讯录</h2>
+        <span className="text-sm text-gray-500">{friends.length} 位好友</span>
       </div>
 
-      <div className="contacts-tabs">
+      <div className="flex gap-2 mb-5 border-b border-gray-100 pb-3">
         <button
-          className={`tab ${activeTab === 'friends' ? 'active' : ''}`}
+          className={`px-4 py-2 text-sm rounded-full flex items-center gap-1 transition-colors ${
+            activeTab === 'friends'
+              ? 'bg-primary-500 text-white'
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
           onClick={() => setActiveTab('friends')}
         >
           好友列表
         </button>
         <button
-          className={`tab ${activeTab === 'requests' ? 'active' : ''}`}
+          className={`px-4 py-2 text-sm rounded-full flex items-center gap-1 transition-colors ${
+            activeTab === 'requests'
+              ? 'bg-primary-500 text-white'
+              : 'text-gray-600 hover:bg-gray-100'
+          }`}
           onClick={() => setActiveTab('requests')}
         >
           新消息
           {pendingRequests.length > 0 && (
-            <span className="badge">{pendingRequests.length}</span>
+            <Badge variant="destructive" className="px-2 py-0.5 text-xs">
+              {pendingRequests.length}
+            </Badge>
           )}
         </button>
       </div>
 
-      <div className="contacts-list">
+      <div className="flex flex-col gap-2.5">
         {activeTab === 'friends' ? (
           friends.length === 0 ? (
-            <div className="empty-state">
+            <div className="text-center py-10 text-gray-500">
               <p>还没有好友，去添加一些吧！</p>
             </div>
           ) : (
@@ -61,7 +73,7 @@ export function ContactsPage({ onChatClick }: ContactsPageProps = {}) {
           )
         ) : (
           pendingRequests.length === 0 ? (
-            <div className="empty-state">
+            <div className="text-center py-10 text-gray-500">
               <p>没有新的好友请求</p>
             </div>
           ) : (
@@ -88,27 +100,23 @@ interface FriendItemProps {
 
 function FriendItem({ friend, onChat, onRemove }: FriendItemProps) {
   return (
-    <div className="contact-item">
-      <div className="avatar">
-        {friend.avatarUrl ? (
-          <img src={friend.avatarUrl} alt={friend.username} />
-        ) : (
-          <div className="avatar-placeholder">
-            {friend.username.charAt(0).toUpperCase()}
-          </div>
-        )}
+    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+      <Avatar
+        src={friend.avatarUrl}
+        alt={friend.username}
+        fallback={friend.username.charAt(0).toUpperCase()}
+      />
+      <div className="flex-1 min-w-0">
+        <span className="font-medium block truncate">{friend.username}</span>
+        <span className="text-xs text-green-600">已添加好友</span>
       </div>
-      <div className="contact-info">
-        <span className="username">{friend.username}</span>
-        <span className="status">已添加好友</span>
-      </div>
-      <div className="contact-actions">
-        <button className="action-btn chat" onClick={onChat}>
+      <div className="flex gap-2 shrink-0">
+        <Button size="sm" onClick={onChat}>
           发消息
-        </button>
-        <button className="action-btn remove" onClick={onRemove}>
+        </Button>
+        <Button size="sm" variant="destructive" onClick={onRemove}>
           删除
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -126,27 +134,25 @@ function FriendRequestItem({
   onReject,
 }: FriendRequestItemProps) {
   return (
-    <div className="contact-item request">
-      <div className="avatar">
-        {request.avatarUrl ? (
-          <img src={request.avatarUrl} alt={request.username} />
-        ) : (
-          <div className="avatar-placeholder">
-            {request.username.charAt(0).toUpperCase()}
-          </div>
-        )}
+    <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
+      <Avatar
+        src={request.avatarUrl}
+        alt={request.username}
+        fallback={request.username.charAt(0).toUpperCase()}
+      />
+      <div className="flex-1 min-w-0">
+        <span className="font-medium block truncate">{request.username}</span>
+        <span className="text-xs text-gray-500">
+          {new Date(request.createdAt).toLocaleDateString()}
+        </span>
       </div>
-      <div className="contact-info">
-        <span className="username">{request.username}</span>
-        <span className="time">{new Date(request.createdAt).toLocaleDateString()}</span>
-      </div>
-      <div className="request-actions">
-        <button className="action-btn accept" onClick={onAccept}>
+      <div className="flex gap-2 shrink-0">
+        <Button size="sm" variant="success" onClick={onAccept}>
           接受
-        </button>
-        <button className="action-btn reject" onClick={onReject}>
+        </Button>
+        <Button size="sm" variant="destructive" onClick={onReject}>
           拒绝
-        </button>
+        </Button>
       </div>
     </div>
   );
