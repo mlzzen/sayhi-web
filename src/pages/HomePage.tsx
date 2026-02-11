@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FriendProvider } from '../context/FriendContext';
 import { ChatProvider, useChat } from '../context/ChatContext';
+import { useFriends } from '../context/FriendContext';
 import { FriendRequestNotification } from '../components/FriendRequestNotification';
 import { ContactsPage } from './ContactsPage';
 import { UserSearchPage } from './UserSearchPage';
@@ -13,6 +14,7 @@ type Tab = 'contacts' | 'search' | 'chat';
 
 function ChatView({ pendingChatUserId }: { pendingChatUserId: number | null }) {
   const { chatList, currentChatUserId, setCurrentChatUserId } = useChat();
+  const { friends } = useFriends();
 
   React.useEffect(() => {
     if (pendingChatUserId) {
@@ -21,8 +23,17 @@ function ChatView({ pendingChatUserId }: { pendingChatUserId: number | null }) {
   }, [pendingChatUserId, setCurrentChatUserId]);
 
   const getChatInfo = (friendId: number) => {
+    // First try to find in chatList
     const chat = chatList.find((c) => c.friendId === friendId);
-    return chat || { friendUsername: 'Unknown', friendAvatarUrl: null };
+    if (chat) {
+      return chat;
+    }
+    // Fallback to friends list if not in chatList (when starting chat from contacts)
+    const friend = friends.find((f) => f.id === friendId);
+    if (friend) {
+      return { friendUsername: friend.username, friendAvatarUrl: friend.avatarUrl };
+    }
+    return { friendUsername: 'Unknown', friendAvatarUrl: null };
   };
 
   return (
