@@ -12,7 +12,7 @@ interface ChatContextType {
   isLoading: boolean;
   refreshChatList: () => Promise<void>;
   loadMessages: (userId: number) => Promise<void>;
-  sendMessage: (receiverId: number, content: string) => void;
+  sendMessage: (receiverId: number, content: string, messageType?: string) => void;
   setCurrentChatUserId: (userId: number | null) => void;
   markAsRead: (userId: number) => Promise<void>;
 }
@@ -100,8 +100,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const sendMessage = useCallback((receiverId: number, content: string) => {
-    webSocketService.sendMessage(receiverId, content);
+  const sendMessage = useCallback((receiverId: number, content: string, messageType: string = 'TEXT') => {
+    webSocketService.sendMessage(receiverId, content, messageType);
 
     // Add message to local state
     const newMessage: Message = {
@@ -111,7 +111,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
       senderUsername: user!.username,
       receiverUsername: '',
       content,
-      messageType: 'TEXT',
+      messageType,
       isRead: false,
       createdAt: new Date().toISOString(),
     };

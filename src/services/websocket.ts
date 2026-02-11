@@ -137,6 +137,11 @@ class WebSocketService {
     });
   }
 
+  // Send message to a user with custom message type (for images)
+  sendMessageWithType(receiverId: number, content: string, messageType: string) {
+    this.sendMessage(receiverId, content, messageType);
+  }
+
   // Send message to a group
   sendGroupMessage(groupId: number, content: string, messageType: string = 'TEXT') {
     if (!this.client || !this.isConnected) {
@@ -150,6 +155,11 @@ class WebSocketService {
         messageType,
       }),
     });
+  }
+
+  // Send group message with custom message type (for images)
+  sendGroupMessageWithType(groupId: number, content: string, messageType: string) {
+    this.sendGroupMessage(groupId, content, messageType);
   }
 
   // Subscribe to message handlers

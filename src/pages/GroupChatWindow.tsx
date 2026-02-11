@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { Avatar } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { ImagePicker } from '../components/ImagePicker';
+import { fileApi } from '../services/api';
 
 interface GroupChatWindowProps {
   groupId: number;
@@ -24,6 +26,7 @@ export function GroupChatWindow({
   const { groupMessages, loadGroupMessages, sendGroupMessage, currentGroupMembers } = useGroups();
   const [inputValue, setInputValue] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [showImagePicker, setShowImagePicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -52,6 +55,19 @@ export function GroupChatWindow({
     }
   };
 
+  const handleSendImage = async (file: File) => {
+    setIsSending(true);
+    try {
+      const { url } = await fileApi.upload(file);
+      sendGroupMessage(groupId, url, 'IMAGE');
+      setShowImagePicker(false);
+    } catch (error) {
+      console.error('Failed to send image:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -67,6 +83,11 @@ export function GroupChatWindow({
   const getMemberName = (senderId: number) => {
     const member = currentGroupMembers.find((m) => m.userId === senderId);
     return member?.username || 'Unknown';
+  };
+
+  const isImageUrl = (content: string) => {
+    return content.match(/\.(jpg|jpeg|png|gif|webp)$/i) !== null ||
+           content.startsWith('http://') || content.startsWith('https://');
   };
 
   return (
@@ -108,6 +129,7 @@ export function GroupChatWindow({
         ) : (
           chatMessages.map((message) => {
             const isOwn = message.senderId === user?.id;
+            const isImage = message.messageType === 'IMAGE' || isImageUrl(message.content);
             return (
               <div
                 key={message.id}
@@ -125,7 +147,16 @@ export function GroupChatWindow({
                       {getMemberName(message.senderId)}
                     </div>
                   )}
-                  <div className="break-words leading-relaxed">{message.content}</div>
+                  {isImage ? (
+                    <img
+                      src={message.content}
+                      alt="Image"
+                      className="max-w-full rounded-lg cursor-pointer hover:opacity-90"
+                      onClick={() => window.open(message.content, '_blank')}
+                    />
+                  ) : (
+                    <div className="break-words leading-relaxed">{message.content}</div>
+                  )}
                   <div
                     className={`text-xs mt-1 opacity-70 text-right ${
                       isOwn ? 'text-white' : 'text-gray-500'
@@ -141,7 +172,25 @@ export function GroupChatWindow({
         <div ref={messagesEndRef} />
       </div>
 
+      {showImagePicker && (
+        <div className="border-t border-gray-100 p-4 bg-gray-50">
+          <ImagePicker
+            onImageSelect={handleSendImage}
+            onCancel={() => setShowImagePicker(false)}
+          />
+        </div>
+      )}
+
       <div className="flex gap-2.5 px-4 py-3 border-t border-gray-100 bg-white">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setShowImagePicker(!showImagePicker)}
+          disabled={isSending}
+          className="shrink-0"
+        >
+          📷
+        </Button>
         <Input
           ref={inputRef}
           className="flex-1"

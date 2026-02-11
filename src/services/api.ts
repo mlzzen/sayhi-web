@@ -18,6 +18,26 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// File upload API with multipart form data
+export const fileApi = {
+  upload: async (file: File): Promise<{ url: string; filename: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await api.post('/api/files/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  },
+
+  delete: async (filename: string): Promise<void> => {
+    await api.delete(`/api/files/upload/${filename}`);
+  },
+};
+
 // Response interceptor for error handling
 api.interceptors.response.use(
   (response) => response,

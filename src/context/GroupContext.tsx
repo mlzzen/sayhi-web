@@ -17,7 +17,7 @@ interface GroupContextType {
   inviteMembers: (groupId: number, userIds: number[]) => Promise<void>;
   removeMember: (groupId: number, userId: number) => Promise<void>;
   leaveGroup: (groupId: number) => Promise<void>;
-  sendGroupMessage: (groupId: number, content: string) => void;
+  sendGroupMessage: (groupId: number, content: string, messageType?: string) => void;
   setCurrentGroup: (group: Group | null) => void;
 }
 
@@ -150,9 +150,9 @@ export function GroupProvider({ children }: { children: ReactNode }) {
     }
   }, [currentGroup]);
 
-  const sendGroupMessage = useCallback((groupId: number, content: string) => {
+  const sendGroupMessage = useCallback((groupId: number, content: string, messageType: string = 'TEXT') => {
     // 只通过 WebSocket 发送消息，等待服务器广播后更新状态
-    webSocketService.sendGroupMessage(groupId, content);
+    webSocketService.sendGroupMessage(groupId, content, messageType);
   }, []);
 
   // Initial load

@@ -4,6 +4,8 @@ import { useAuth } from '../context/AuthContext';
 import { Avatar } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { ImagePicker } from '../components/ImagePicker';
+import { fileApi } from '../services/api';
 
 interface ChatWindowProps {
   friendId: number;
@@ -17,6 +19,7 @@ export function ChatWindow({ friendId, friendUsername, friendAvatarUrl, onClose 
   const { messages, loadMessages, sendMessage, markAsRead, isConnected } = useChat();
   const [inputValue, setInputValue] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [showImagePicker, setShowImagePicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -46,6 +49,19 @@ export function ChatWindow({ friendId, friendUsername, friendAvatarUrl, onClose 
     }
   };
 
+  const handleSendImage = async (file: File) => {
+    setIsSending(true);
+    try {
+      const { url } = await fileApi.upload(file);
+      sendMessage(friendId, url, 'IMAGE');
+      setShowImagePicker(false);
+    } catch (error) {
+      console.error('Failed to send image:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -56,6 +72,11 @@ export function ChatWindow({ friendId, friendUsername, friendAvatarUrl, onClose 
   const formatTime = (createdAt: string) => {
     const date = new Date(createdAt);
     return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const isImageUrl = (content: string) => {
+    return content.match(/\.(jpg|jpeg|png|gif|webp)$/i) !== null ||
+           content.startsWith('http://') || content.startsWith('https://');
   };
 
   return (
@@ -91,6 +112,7 @@ export function ChatWindow({ friendId, friendUsername, friendAvatarUrl, onClose 
         ) : (
           chatMessages.map((message) => {
             const isOwn = message.senderId === user?.id;
+            const isImage = message.messageType === 'IMAGE' || isImageUrl(message.content);
             return (
               <div
                 key={message.id}
@@ -103,7 +125,16 @@ export function ChatWindow({ friendId, friendUsername, friendAvatarUrl, onClose 
                       : 'bg-gray-100 text-gray-800 rounded-bl-md'
                   }`}
                 >
-                  <div className="break-words leading-relaxed">{message.content}</div>
+                  {isImage ? (
+                    <img
+                      src={message.content}
+                      alt="Image"
+                      className="max-w-full rounded-lg cursor-pointer hover:opacity-90"
+                      onClick={() => window.open(message.content, '_blank')}
+                    />
+                  ) : (
+                    <div className="break-words leading-relaxed">{message.content}</div>
+                  )}
                   <div
                     className={`text-xs mt-1 opacity-70 text-right ${
                       isOwn ? 'text-white' : 'text-gray-500'
@@ -119,7 +150,25 @@ export function ChatWindow({ friendId, friendUsername, friendAvatarUrl, onClose 
         <div ref={messagesEndRef} />
       </div>
 
+      {showImagePicker && (
+        <div className="border-t border-gray-100 p-4 bg-gray-50">
+          <ImagePicker
+            onImageSelect={handleSendImage}
+            onCancel={() => setShowImagePicker(false)}
+          />
+        </div>
+      )}
+
       <div className="flex gap-2.5 px-4 py-3 border-t border-gray-100 bg-white">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setShowImagePicker(!showImagePicker)}
+          disabled={isSending}
+          className="shrink-0"
+        >
+          📷
+        </Button>
         <Input
           ref={inputRef}
           className="flex-1"

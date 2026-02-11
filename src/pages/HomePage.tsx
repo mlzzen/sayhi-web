@@ -12,6 +12,7 @@ import { ChatWindow } from './ChatWindow';
 import { GroupsPage } from './GroupsPage';
 import { GroupChatWindow } from './GroupChatWindow';
 import { Button } from '../components/ui/button';
+import { AvatarUpload } from '../components/AvatarUpload';
 import { type Group } from '../types';
 
 type Tab = 'contacts' | 'search' | 'chat' | 'groups';
@@ -76,10 +77,16 @@ function ChatView({
 }
 
 export function HomePage() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>('chat');
   const [pendingChatUserId, setPendingChatUserId] = useState<number | null>(null);
   const [pendingGroup, setPendingGroup] = useState<Group | null>(null);
+
+  const handleAvatarUpdate = (newAvatarUrl: string) => {
+    if (user) {
+      updateUser({ ...user, avatarUrl: newAvatarUrl || null });
+    }
+  };
 
   const handleChatClick = (friendId: number) => {
     setPendingChatUserId(friendId);
@@ -99,6 +106,13 @@ export function HomePage() {
             <header className="flex items-center justify-between px-6 py-4 bg-white border-b border-gray-200">
               <h1 className="text-xl font-semibold text-gray-900">SayHi</h1>
               <div className="flex items-center gap-4">
+                {user && (
+                  <AvatarUpload
+                    avatarUrl={user.avatarUrl}
+                    username={user.username}
+                    onAvatarUpdate={handleAvatarUpdate}
+                  />
+                )}
                 <span className="text-sm text-gray-600">Welcome, {user?.username}</span>
                 <Button variant="outline" size="sm" onClick={logout}>
                   Logout
