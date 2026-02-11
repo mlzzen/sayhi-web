@@ -1,5 +1,5 @@
 import { useState, useRef, type ChangeEvent } from 'react';
-import { Button } from './button';
+import { Button } from './ui/button';
 
 interface ImagePickerProps {
   onImageSelect: (file: File) => void;
