@@ -34,10 +34,17 @@ export function GroupProvider({ children }: { children: ReactNode }) {
   // Listen for incoming group messages
   useEffect(() => {
     const handleGroupMessage = (message: GroupMessage) => {
-      setGroupMessages((prev) => ({
-        ...prev,
-        [message.groupId]: [...(prev[message.groupId] || []), message],
-      }));
+      setGroupMessages((prev) => {
+        const existingMessages = prev[message.groupId] || [];
+        // 防止重复添加相同 ID 的消息
+        if (existingMessages.some((m) => m.id === message.id)) {
+          return prev;
+        }
+        return {
+          ...prev,
+          [message.groupId]: [...existingMessages, message],
+        };
+      });
     };
 
     webSocketService.onMessage('/topic/group', handleGroupMessage);
@@ -144,24 +151,9 @@ export function GroupProvider({ children }: { children: ReactNode }) {
   }, [currentGroup]);
 
   const sendGroupMessage = useCallback((groupId: number, content: string) => {
+    // 只通过 WebSocket 发送消息，等待服务器广播后更新状态
     webSocketService.sendGroupMessage(groupId, content);
-
-    // Add message to local state
-    const newMessage: GroupMessage = {
-      id: Date.now(),
-      senderId: user!.id,
-      senderUsername: user!.username,
-      groupId,
-      content,
-      messageType: 'TEXT',
-      createdAt: new Date().toISOString(),
-    };
-
-    setGroupMessages((prev) => ({
-      ...prev,
-      [groupId]: [...(prev[groupId] || []), newMessage],
-    }));
-  }, [user]);
+  }, []);
 
   // Initial load
   useEffect(() => {
