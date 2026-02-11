@@ -8,6 +8,7 @@ class WebSocketService {
   private messageHandlers: Map<string, Set<(message: any) => void>> = new Map();
   private connectionHandlers: Set<(connected: boolean) => void> = new Set();
   private isConnected = false;
+  private subscribedGroups: Set<number> = new Set();
 
   connect(userId: number, token: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -26,6 +27,10 @@ class WebSocketService {
           this.isConnected = true;
           this.notifyConnection(true);
           this.subscribeToUserMessages();
+          // Re-subscribe to groups
+          this.subscribedGroups.forEach((groupId) => {
+            this.subscribeToGroup(groupId);
+          });
           resolve();
         },
         onDisconnect: () => {
@@ -55,6 +60,7 @@ class WebSocketService {
       this.client.deactivate();
       this.client = null;
       this.isConnected = false;
+      this.subscribedGroups.clear();
     }
   }
 
@@ -78,6 +84,32 @@ class WebSocketService {
     );
   }
 
+  // Subscribe to group messages
+  subscribeToGroup(groupId: number) {
+    if (!this.client || !this.isConnected) {
+      this.subscribedGroups.add(groupId);
+      return;
+    }
+
+    this.subscribedGroups.add(groupId);
+
+    this.client.subscribe(
+      `/topic/group/${groupId}`,
+      (message: IMessage) => {
+        this.handleMessage('/topic/group', JSON.parse(message.body));
+      }
+    );
+  }
+
+  // Unsubscribe from group messages
+  unsubscribeFromGroup(groupId: number) {
+    if (!this.client) return;
+
+    this.subscribedGroups.delete(groupId);
+
+    this.client.unsubscribe(`/topic/group/${groupId}`);
+  }
+
   private handleMessage(destination: string, payload: any) {
     const handlers = this.messageHandlers.get(destination);
     if (handlers) {
@@ -99,6 +131,21 @@ class WebSocketService {
       destination: `/app/chat/${receiverId}`,
       body: JSON.stringify({
         receiverId,
+        content,
+        messageType,
+      }),
+    });
+  }
+
+  // Send message to a group
+  sendGroupMessage(groupId: number, content: string, messageType: string = 'TEXT') {
+    if (!this.client || !this.isConnected) {
+      throw new Error('WebSocket not connected');
+    }
+
+    this.client.publish({
+      destination: `/app/group/${groupId}`,
+      body: JSON.stringify({
         content,
         messageType,
       }),

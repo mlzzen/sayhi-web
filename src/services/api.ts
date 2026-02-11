@@ -92,3 +92,38 @@ export const messageApi = {
   markAsRead: (fromUserId: number) =>
     api.put(`/api/messages/read/${fromUserId}`),
 };
+
+// Group API
+export const groupApi = {
+  // Create a new group
+  createGroup: (data: { name: string; description?: string; memberIds?: number[] }) =>
+    api.post('/api/groups', data),
+
+  // Get user's groups
+  getGroups: () => api.get('/api/groups'),
+
+  // Get group details
+  getGroup: (groupId: number) => api.get(`/api/groups/${groupId}`),
+
+  // Get group members
+  getGroupMembers: (groupId: number) => api.get(`/api/groups/${groupId}/members`),
+
+  // Invite members to a group
+  inviteMembers: (groupId: number, userIds: number[]) =>
+    api.post(`/api/groups/${groupId}/members`, { userIds }),
+
+  // Remove member from group
+  removeMember: (groupId: number, userId: number) =>
+    api.delete(`/api/groups/${groupId}/members/${userId}`),
+
+  // Get group messages
+  getGroupMessages: (groupId: number, page?: number, size?: number) =>
+    api.get(`/api/groups/${groupId}/messages`, { params: { page, size } }),
+
+  // Send group message
+  sendGroupMessage: (groupId: number, content: string, messageType?: string) =>
+    api.post(`/api/groups/${groupId}/messages`, { content, messageType }),
+
+  // Leave group
+  leaveGroup: (groupId: number) => api.post(`/api/groups/${groupId}/leave`),
+};

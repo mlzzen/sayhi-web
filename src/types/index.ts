@@ -82,3 +82,59 @@ export interface ChatHistoryItem {
   lastMessage: Message | null;
   unreadCount: number;
 }
+
+// Group types
+export interface Group {
+  id: number;
+  name: string;
+  description: string | null;
+  avatarUrl: string | null;
+  ownerId: number;
+  ownerUsername: string;
+  memberCount: number;
+  createdAt: string;
+}
+
+export interface GroupMember {
+  id: number;
+  userId: number;
+  username: string;
+  avatarUrl: string | null;
+  role: 'OWNER' | 'ADMIN' | 'MEMBER';
+  joinedAt: string;
+}
+
+export interface GroupMessage {
+  id: number;
+  senderId: number;
+  senderUsername: string;
+  groupId: number;
+  content: string;
+  messageType: MessageType;
+  createdAt: string;
+}
+
+export interface CreateGroupRequest {
+  name: string;
+  description?: string;
+  memberIds?: number[];
+}
+
+export interface InviteMemberRequest {
+  userIds: number[];
+}
+
+export interface CreateGroupMessageRequest {
+  content: string;
+  messageType?: MessageType;
+}
+
+export interface ChatItem {
+  type: 'user' | 'group';
+  id: number;
+  name: string;
+  avatarUrl: string | null;
+  lastMessage?: string;
+  unreadCount: number;
+  updatedAt?: string;
+}
